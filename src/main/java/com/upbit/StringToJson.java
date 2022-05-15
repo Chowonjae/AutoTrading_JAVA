@@ -7,9 +7,10 @@ import org.json.simple.parser.ParseException;
 import java.util.List;
 
 public class StringToJson {
-    public void stj(String result) throws ParseException{
+    public JSONArray stj(String result) throws ParseException{
         JSONParser jsonParser = new JSONParser();
         JSONArray jsonArray = (JSONArray) jsonParser.parse(result);
-        System.out.println(jsonArray.get(0));
+//        System.out.println(jsonArray.get(0));
+        return jsonArray;
     }
 }

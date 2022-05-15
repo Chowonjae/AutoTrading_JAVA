@@ -12,6 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Arrays;
 
 @SpringBootApplication
 public class UpbitApplication {
@@ -30,10 +31,18 @@ public class UpbitApplication {
         String secret = (String) jo.get("secretKey");
 
         ExchangeApi exchangeApi = new ExchangeApi(access, secret);
-        String a = exchangeApi.get_balances();
-        JSONArray jsonArray = (JSONArray) jp.parse(a);
-        JSONObject b = (JSONObject)jsonArray.get(0);
-        System.out.println(b.get("balance"));
+//        GetTickSize gts = new GetTickSize();
+//        System.out.println(512342 * 0.2);
+//        System.out.println(gts.get_tick_size(512342 * 0.2));
+//        String a = exchangeApi.get_balances();
+//        System.out.println(a);
+//        double b = exchangeApi.get_balance("KRW-ETH");
+//        System.out.println(b);
+        String c = exchangeApi.buy_limit_order("KRW-BTC", 39372000, 0.00126, false);
+        System.out.println(c);
+//        JSONArray jsonArray = (JSONArray) jp.parse(a);
+//        JSONObject b = (JSONObject)jsonArray.get(0);
+//        System.out.println(b.get("balance"));
 //        for (Object object : jsonArray){
 //            JSONObject jsonObject = (JSONObject) object;
 //            System.out.println(jsonObject.get("currency"));
