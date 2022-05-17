@@ -51,10 +51,11 @@ public class RequestApi {
             request.setEntity(new StringEntity(new Gson().toJson(params)));
 
             HttpResponse response = client.execute(request);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
-                entity = response.getEntity();
-            }
+//            int statusCode = response.getStatusLine().getStatusCode();
+//            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
+//                entity = response.getEntity();
+//            }
+            entity = response.getEntity();
 
             result = EntityUtils.toString(entity, "UTF-8");
         }catch (IOException e){
@@ -73,10 +74,11 @@ public class RequestApi {
             request.addHeader("Authorization", authenticationToken);
 
             HttpResponse response = client.execute(request);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
-                entity = response.getEntity();
-            }
+//            int statusCode = response.getStatusLine().getStatusCode();
+//            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
+//                entity = response.getEntity();
+//            }
+            entity = response.getEntity();
 
             result = EntityUtils.toString(entity, "UTF-8");
         }catch (IOException e){
