@@ -2,6 +2,7 @@ package com.api.ExchangeApi;
 
 import com.api.RequestApi;
 import com.api.RequestApi.*;
+import com.api.Result;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import org.apache.http.HttpEntity;
@@ -30,6 +31,20 @@ public class ExchangeApi {
     public ExchangeApi(String access, String secret){
         this.access = access;
         this.secret = secret;
+    }
+
+    private String[] _convertToStringToArray(String StA){
+        String[] result = new String[2];
+        String[] StAArray = StA.split(", ");
+        String[] req = new String[3];
+        String a = StAArray[0].replaceFirst("\\[", "");
+        req[0] = StAArray[1].replaceFirst("\\[", "");
+        req[1] = StAArray[2];
+        req[2] = StAArray[3].replace("]]", "");
+        result[0] = a;
+        result[1] = Arrays.toString(req);
+
+        return result;
     }
 
     private JSONArray _convertToJson(String result){
@@ -78,21 +93,23 @@ public class ExchangeApi {
     }
 
 //    전체 계좌 조회
-    public String get_balances(){
+    public Result<String, String[]> get_balances(){
         return get_balances(false);
     }
-    public String get_balances(boolean contain_req){
+    public Result<String, String[]> get_balances(boolean contain_req){
         JSONArray jArray = null;
-        String result = "";
+        Result<String, String[]> response = null;
+        String result1 = "";
+        String result2 = "";
         try{
             String url = "https://api.upbit.com/v1/accounts";
             String authenticationToken = _request_headers();
             RequestApi requestApi = new RequestApi();
-            result = requestApi._send_get_request(url, authenticationToken);
+            response = requestApi._send_get_request(url, authenticationToken);
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
-        return result;
+        return response;
     }
 
 //    특정 코인 잔고 조회
@@ -109,7 +126,11 @@ public class ExchangeApi {
             if (ticker.contains("-")){
                 ticker_name = ticker.split("-")[1];
             }
-            String balances = get_balances();
+
+            Result<String, String[]> balancesReq = get_balances(true);
+
+            String balances = balancesReq.getFirst();
+            String[] req = balancesReq.getSecond();
             for (Object o : _convertToJson(balances)){
                 JSONObject jObject = (JSONObject) o;
                 if (jObject.get("currency").equals(ticker_name)){
@@ -120,12 +141,16 @@ public class ExchangeApi {
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
+
         return balance;
     }
 
+//    -------------------------------------------------------------------------------
+//    주문
+//    -------------------------------------------------------------------------------
 //    지정가 매수 (지정가 매수는 price가 호가, 시장가 매수는 price가 내가 주문하길 원하는 잔고)
     public String buy_limit_order(String ticker, int price, double volume, boolean contain_req){
-        String result = "";
+        Result<String, String[]> result = new Result<>();
         try{
             String url = "https://api.upbit.com/v1/orders";
             HashMap<String, String> params = new HashMap<>();
@@ -140,12 +165,12 @@ public class ExchangeApi {
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
-        return result;
+        return result.getFirst();
     }
 
 //    시장가 매도
     public String sell_market_order(String ticker, double volume, boolean contain_req){
-        String result = "";
+        Result<String, String[]> result = new Result<>();
         try{
             String url = "https://api.upbit.com/v1/orders";
             HashMap<String, String> params = new HashMap<>();
@@ -159,7 +184,7 @@ public class ExchangeApi {
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
-        return result;
+        return result.getFirst();
     }
 
 }

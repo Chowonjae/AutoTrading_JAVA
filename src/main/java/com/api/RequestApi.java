@@ -1,6 +1,7 @@
 package com.api;
 
 import com.google.gson.Gson;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -9,6 +10,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -40,8 +42,9 @@ public class RequestApi {
         }
         return result;
     }
-    public String _send_post_request(String url, String authenticationToken, HashMap<String, String> params){
-        String result = "";
+
+    public Result<String, String[]> _send_post_request(String url, String authenticationToken, HashMap<String, String> params){
+        Result<String, String[]> result = new Result<>();
         HttpEntity entity = null;
         try{
             HttpClient client = HttpClientBuilder.create().build();
@@ -51,21 +54,25 @@ public class RequestApi {
             request.setEntity(new StringEntity(new Gson().toJson(params)));
 
             HttpResponse response = client.execute(request);
-//            int statusCode = response.getStatusLine().getStatusCode();
-//            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
-//                entity = response.getEntity();
-//            }
-            entity = response.getEntity();
-
-            result = EntityUtils.toString(entity, "UTF-8");
-        }catch (IOException e){
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
+                Header[] remaining_req_array = response.getHeaders("Remaining-Req");
+                String remaining_req = String.valueOf(remaining_req_array[0]);
+                result.setSecond(_parse_remaining_req(remaining_req));
+                entity = response.getEntity();
+                result.setFirst(EntityUtils.toString(entity, "UTF-8"));
+            }else {
+                error error = new error();
+                error.raise_error(response);
+            }
+        }catch (IOException | ParseException e){
             e.printStackTrace();
         }
         return result;
     }
 
-    public String _send_get_request(String url, String authenticationToken){
-        String result = "";
+    public Result<String, String[]> _send_get_request(String url, String authenticationToken){
+        Result<String, String[]> result = new Result<>();
         HttpEntity entity = null;
         try {
             HttpClient client = HttpClientBuilder.create().build();
@@ -74,14 +81,18 @@ public class RequestApi {
             request.addHeader("Authorization", authenticationToken);
 
             HttpResponse response = client.execute(request);
-//            int statusCode = response.getStatusLine().getStatusCode();
-//            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
-//                entity = response.getEntity();
-//            }
-            entity = response.getEntity();
-
-            result = EntityUtils.toString(entity, "UTF-8");
-        }catch (IOException e){
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
+                Header[] remaining_req_array = response.getHeaders("Remaining-Req");
+                String remaining_req = String.valueOf(remaining_req_array[0]);
+                result.setSecond(_parse_remaining_req(remaining_req));
+                entity = response.getEntity();
+                result.setFirst(EntityUtils.toString(entity, "UTF-8"));
+            }else{
+                error error = new error();
+                error.raise_error(response);
+            }
+        }catch (IOException | ParseException e){
             e.printStackTrace();
         }
         return result;
