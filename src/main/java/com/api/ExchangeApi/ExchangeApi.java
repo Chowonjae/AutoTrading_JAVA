@@ -1,62 +1,66 @@
 package com.api.ExchangeApi;
 
 import com.api.RequestApi;
-import com.api.RequestApi.*;
-import com.api.Result;
+import com.api.dto.RequestDto;
+import com.api.dto.ResponseDto;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+@Component
 public class ExchangeApi {
-    String access = "";
-    String secret = "";
+    private String access = "";
+    private String secret = "";
+    @Value("${upbit.url.ExchangeApi.asset.accounts}")
+    private String accounts;
+    @Value("${upbit.url.ExchangesApi.bill.order}")
+    private String order;
+    @Value("${upbit.url.ExchangesApi.bill.orders}")
+    private String orders;
+    @Value("${upbit.url.ExchangesApi.bill.chance}")
+    private String chance;
 
     public ExchangeApi(String access, String secret){
         this.access = access;
         this.secret = secret;
     }
 
-    private String[] _convertToStringToArray(String StA){
-        String[] result = new String[2];
-        String[] StAArray = StA.split(", ");
-        String[] req = new String[3];
-        String a = StAArray[0].replaceFirst("\\[", "");
-        req[0] = StAArray[1].replaceFirst("\\[", "");
-        req[1] = StAArray[2];
-        req[2] = StAArray[3].replace("]]", "");
-        result[0] = a;
-        result[1] = Arrays.toString(req);
-
-        return result;
-    }
-
-    private JSONArray _convertToJson(String result){
-        JSONParser jsonParser = new JSONParser();
-        JSONArray jsonArray = null;
-        try {
-            jsonArray = (JSONArray) jsonParser.parse(result);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return jsonArray;
-    }
+//    private String[] _convertToStringToArray(String StA){
+//        String[] result = new String[2];
+//        String[] StAArray = StA.split(", ");
+//        String[] req = new String[3];
+//        String a = StAArray[0].replaceFirst("\\[", "");
+//        req[0] = StAArray[1].replaceFirst("\\[", "");
+//        req[1] = StAArray[2];
+//        req[2] = StAArray[3].replace("]]", "");
+//        result[0] = a;
+//        result[1] = Arrays.toString(req);
+//
+//        return result;
+//    }
+//
+//    private JSONArray _convertToJson(String result){
+//        JSONParser jsonParser = new JSONParser();
+//        JSONArray jsonArray = null;
+//        try {
+//            jsonArray = (JSONArray) jsonParser.parse(result);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        return jsonArray;
+//    }
 
     private String _request_headers(){
         Algorithm algorithm = Algorithm.HMAC256(this.secret);
@@ -93,19 +97,18 @@ public class ExchangeApi {
     }
 
 //    전체 계좌 조회
-    public Result<String, String[]> get_balances(){
+    public ResponseDto<JSONArray, String[]> get_balances(){
         return get_balances(false);
     }
-    public Result<String, String[]> get_balances(boolean contain_req){
+    public ResponseDto<JSONArray, String[]> get_balances(boolean contain_req){
         JSONArray jArray = null;
-        Result<String, String[]> response = null;
-        String result1 = "";
-        String result2 = "";
+        ResponseDto<JSONArray, String[]> response = null;
+        RequestDto requestDto = new RequestDto();
         try{
-            String url = "https://api.upbit.com/v1/accounts";
-            String authenticationToken = _request_headers();
+            requestDto.setUrl("https://api.upbit.com/v1/accounts");
+            requestDto.setAuthenticationToken(_request_headers());
             RequestApi requestApi = new RequestApi();
-            response = requestApi._send_get_request(url, authenticationToken);
+            response = requestApi._send_get_request(requestDto);
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
@@ -127,11 +130,11 @@ public class ExchangeApi {
                 ticker_name = ticker.split("-")[1];
             }
 
-            Result<String, String[]> balancesReq = get_balances(true);
+            ResponseDto<JSONArray, String[]> balancesReq = get_balances(true);
 
-            String balances = balancesReq.getFirst();
-            String[] req = balancesReq.getSecond();
-            for (Object o : _convertToJson(balances)){
+            JSONArray balances = balancesReq.getData();
+            String[] req = balancesReq.getRemaining();
+            for (Object o : balances){
                 JSONObject jObject = (JSONObject) o;
                 if (jObject.get("currency").equals(ticker_name)){
                     balance = Double.parseDouble((String) jObject.get("balance"));
@@ -150,41 +153,45 @@ public class ExchangeApi {
 //    -------------------------------------------------------------------------------
 //    지정가 매수 (지정가 매수는 price가 호가, 시장가 매수는 price가 내가 주문하길 원하는 잔고)
     public String buy_limit_order(String ticker, int price, double volume, boolean contain_req){
-        Result<String, String[]> result = new Result<>();
+        ResponseDto<String, String[]> responseDto = new ResponseDto<>();
+        RequestDto requestDto = new RequestDto();
         try{
-            String url = "https://api.upbit.com/v1/orders";
+            requestDto.setUrl("https://api.upbit.com/v1/orders");
             HashMap<String, String> params = new HashMap<>();
             params.put("market", ticker);
             params.put("side", "bid");
             params.put("volume", String.format("%.8f", volume - 0.00000001));
             params.put("price", String.valueOf(price));
             params.put("ord_type", "limit");
-            String authenticationToken = _request_headers_withQuery(params);
+            requestDto.setAuthenticationToken(_request_headers_withQuery(params));
+            requestDto.setParams(params);
             RequestApi requestApi = new RequestApi();
-            result = requestApi._send_post_request(url, authenticationToken, params);
+            responseDto = requestApi._send_post_request(requestDto);
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
-        return result.getFirst();
+        return responseDto.getData();
     }
 
 //    시장가 매도
     public String sell_market_order(String ticker, double volume, boolean contain_req){
-        Result<String, String[]> result = new Result<>();
+        ResponseDto<String, String[]> responseDto = new ResponseDto<>();
+        RequestDto requestDto = new RequestDto();
         try{
-            String url = "https://api.upbit.com/v1/orders";
+            requestDto.setUrl("https://api.upbit.com/v1/orders");
             HashMap<String, String> params = new HashMap<>();
             params.put("market", ticker);
             params.put("side", "ask");
             params.put("volume", String.valueOf(volume));
             params.put("ord_type", "market");
-            String authenticationToken = _request_headers_withQuery(params);
+            requestDto.setAuthenticationToken(_request_headers_withQuery(params));
+            requestDto.setParams(params);
             RequestApi requestApi = new RequestApi();
-            result = requestApi._send_post_request(url, authenticationToken, params);
+            responseDto = requestApi._send_post_request(requestDto);
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
-        return result.getFirst();
+        return responseDto.getData();
     }
 
 }

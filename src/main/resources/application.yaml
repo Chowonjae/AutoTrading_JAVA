@@ -1,0 +1,23 @@
+upbit:
+  url:
+    ExchangeApi:
+      asset:
+        accounts: https://api.upbit.com/v1/accounts
+      bill:
+        order: https://api.upbit.com/v1/order               # (GET) ?? ?? ??, (DELETE) ?? ?? ??
+        orders: https://api.upbit.com/v1/orders             # (GET) ?? ??? ??, (POST) ????
+        chance: https://api.upbit.com/v1/orders/chance      # (GET) ?? ?? ??
+    QuotationApi:
+      market: https://api.upbit.com/v1/market/all           # (GET) ?? ?? ??
+      candles:
+        minutes: https://api.upbit.com/v1/candles/minutes   # + {unit} (GET) ? ??
+        days: https://api.upbit.com/v1/candles/days         # (GET) ? ??
+        weeks: https://api.upbit.com/v1/candles/weeks       # (GET) ? ??
+        months: https://api.upbit.com/v1/candles/months     # (GET) ? ??
+      trades:
+        ticks: https://api.upbit.com/v1/trades/ticks        # (GET) ?? ?? ??
+      ticker: https://api.upbit.com/v1/ticker               # (GET) ??? ??
+      orderbook: https://api.upbit.com/v1/orderbook         # (GET) ?? ?? ??
+  api:
+    accessKey: uc5O9xHyqTAgzKzxqW9jORs3zk13encGfSHoYBNj
+    secretKey: zlwx1acDABnCPx8dNLx10o0dEQfqU7y5tPyJMCo2
