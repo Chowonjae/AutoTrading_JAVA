@@ -3,6 +3,10 @@ package com.api;
 import com.api.dto.RequestDto;
 import com.api.dto.ResponseDto;
 import com.google.gson.Gson;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -18,8 +22,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,6 +58,42 @@ public class RequestApi {
         }catch (Exception e){
             System.out.println(e.getClass().getName());
             Arrays.fill(result, null);
+        }
+        return result;
+    }
+
+    public ResponseDto<JSONArray, String[]> _call_public_api(RequestDto requestDto){
+        ResponseDto<JSONArray, String[]> result = new ResponseDto<>();
+        OkHttpClient client = new OkHttpClient();
+//        HttpGet request = new HttpGet(url);
+        ArrayList<String> queryElements = new ArrayList<>();
+        String queryString = "";
+        if (requestDto.getParams() != null){
+            for (Map.Entry<String, String> entity : requestDto.getParams().entrySet()) {
+                queryElements.add(entity.getKey() + "=" + entity.getValue());
+            }
+            queryString = String.join("&", queryElements.toArray(new String[0]));
+        }
+
+        try{
+            Request request = new Request.Builder()
+                    .url(requestDto.getUrl() + "?" + queryString)
+                    .get()
+                    .addHeader("Accept", "application/json")
+                    .build();
+            Response response = client.newCall(request).execute();
+            int statusCode = response.code();
+            if (statusCode >= HTTP_RESP_CODE_START && statusCode < HTTP_RESP_CODE_END){
+                String remaining_req = response.header("Remaining-Req");
+                result.setRemaining(_parse_remaining_req(remaining_req));
+                result.setData(_convertToJson(Objects.requireNonNull(response.body()).string()));
+            }else{
+                error error = new error();
+                error.raise_error(response);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return result;
     }
@@ -146,7 +185,6 @@ public class RequestApi {
 
     // 남은 요청 횟수 조회해서 거래 일시 정지 밑 진행 추가
     public static void main(String[] argb){
-        String[] a = _parse_remaining_req("Remaining-Req: group=order; min=59; sec=4");
-        System.out.println(Arrays.toString(a));
+
     }
 }

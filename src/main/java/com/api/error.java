@@ -1,10 +1,14 @@
 package com.api;
 
+import okhttp3.Response;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
+import java.util.Objects;
 
 class UpbitError{
     @Override
@@ -133,6 +137,31 @@ class InValidAccessKey{
 }
 
 public class error {
+    public String raise_error(Response response) throws ParseException, IOException {
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse(Objects.requireNonNull(response.body()).string());
+        JSONObject error = (JSONObject) jsonObject.get("error");
+        String message = (String) error.get("message");
+        String name = (String) error.get("name");
+        int code = response.code();
+
+        System.out.println(code);
+        System.out.println(message);
+        System.out.println(name);
+
+        if (code == 429){
+            return new TooManyRequests().toString();
+        }else if (code == 401){
+            if (name.equals("jwt_verification")){
+                return new JwtVerification().toString();
+            }else if (name.equals("invalid_access_key")){
+                return new InValidAccessKey().toString();
+            }
+        }else{
+            return new UpbitError().toString();
+        }
+        return "";
+    }
     public String raise_error(HttpResponse response) throws ParseException{
         JSONParser parser = new JSONParser();
         HttpEntity entity = response.getEntity();

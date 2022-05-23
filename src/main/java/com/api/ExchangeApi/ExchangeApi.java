@@ -101,7 +101,7 @@ public class ExchangeApi {
         return get_balances(false);
     }
     public ResponseDto<JSONArray, String[]> get_balances(boolean contain_req){
-        JSONArray jArray = null;
+//        JSONArray jArray = null;
         ResponseDto<JSONArray, String[]> response = null;
         RequestDto requestDto = new RequestDto();
         try{
