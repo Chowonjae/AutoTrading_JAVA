@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -65,7 +64,6 @@ public class RequestApi {
     public ResponseDto<JSONArray, String[]> _call_public_api(RequestDto requestDto){
         ResponseDto<JSONArray, String[]> result = new ResponseDto<>();
         OkHttpClient client = new OkHttpClient();
-//        HttpGet request = new HttpGet(url);
         ArrayList<String> queryElements = new ArrayList<>();
         String queryString = "";
         if (requestDto.getParams() != null){

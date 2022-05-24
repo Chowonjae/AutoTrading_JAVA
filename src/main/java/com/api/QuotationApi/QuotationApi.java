@@ -1,10 +1,16 @@
 package com.api.QuotationApi;
 
+import com.api.RequestApi;
 import com.api.dto.RequestDto;
 import com.api.dto.ResponseDto;
+import okhttp3.Response;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class QuotationApi {
 //    private String _request_headers(){
@@ -42,16 +48,42 @@ public class QuotationApi {
         return url;
     }
 
-//    public ResponseDto<JSONArray, String[]> get_tickers(){return get_tickers("", false, false, false)}
-//    public ResponseDto<JSONArray, String[]> get_tickers(){
-//        ResponseDto<JSONArray, String[]> response = null;
-//        RequestDto requestDto = new RequestDto();
-//        try{
-//            requestDto.setUrl("https://api.upbit.com/v1/market/all");
-//        }
-//    }
+    public static ResponseDto<List<String>, String[]> get_tickers(){ return get_tickers("", false, false, false); }
+    public static ResponseDto<List<String>, String[]> get_tickers(String fiat) { return get_tickers(fiat, false, false, false); }
+    public static ResponseDto<List<String>, String[]> get_tickers(String fiat, boolean is_details,
+                                                        boolean limit_info, boolean verbose){
+        ResponseDto<JSONArray, String[]> response;
+        ResponseDto<List<String>, String[]> result = new ResponseDto<>();
+        RequestDto requestDto = new RequestDto();
+        HashMap<String, String> params = new HashMap<>();
+        List<String> tickers = new ArrayList<>();
+        params.put("is_details", String.valueOf(is_details));
+        try{
+            requestDto.setUrl("https://api.upbit.com/v1/market/all");
+            requestDto.setParams(params);
+            RequestApi requestApi = new RequestApi();
+            response = requestApi._call_public_api(requestDto);
+
+            if (!verbose){
+                for (Object o : response.getData()){
+                    JSONObject jsonObject = (JSONObject) o;
+                    if (jsonObject.get("market").toString().startsWith(fiat)){
+                        tickers.add((String) jsonObject.get("market"));
+                    }
+                }
+                result.setData(tickers);
+            }
+            result.setRemaining(response.getRemaining());
+
+        }catch (Exception e){
+            System.out.println(e.getClass().getName());
+        }
+
+        return result;
+    }
 
     public static void main(String[] argv){
-        System.out.println(get_url_ohlcv("month"));
+//        System.out.println(get_url_ohlcv("month"));
+        System.out.println(get_tickers("KRW").getData());
     }
 }

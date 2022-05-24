@@ -6,6 +6,7 @@ public class RequestDto {
     private String url = "";
     private String authenticationToken = "";
     private HashMap<String, String> params = null;
+    private HashMap<String, Boolean> params_bool = null;
 
     public String getUrl() {
         return url;
@@ -23,9 +24,7 @@ public class RequestDto {
         this.authenticationToken = authenticationToken;
     }
 
-    public HashMap<String, String> getParams() {
-        return params;
-    }
+    public HashMap<String, String> getParams() { return params; }
 
     public void setParams(HashMap<String, String> params) {
         this.params = params;
