@@ -7,16 +7,46 @@ import okhttp3.Response;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class QuotationApi {
-//    private String _request_headers(){
-//
-//    }
-    private static String get_url_ohlcv(String interval){
+//    데이터 가공영역 start {
+    private String Object_Double(Object o){
+        BigDecimal result = new BigDecimal(Double.parseDouble(String.valueOf(o)));
+        return result.toString();
+    }
+
+    private JSONArray ohlcv_conversion(JSONArray ja){
+        JSONArray result = new JSONArray();
+        for (Object o : ja){
+            JSONObject jo = (JSONObject) o;
+            HashMap<String, String> hashMap = new HashMap<>();
+            hashMap.put("datetime", String.valueOf(jo.get("candle_date_time_kst")));
+            hashMap.put("open", Object_Double(jo.get("opening_price")));
+            hashMap.put("high", Object_Double(jo.get("high_price")));
+            hashMap.put("low", Object_Double(jo.get("low_price")));
+            hashMap.put("close", Object_Double(jo.get("trade_price")));
+            hashMap.put("volume", Object_Double(jo.get("candle_acc_trade_volume")));
+            hashMap.put("value", Object_Double(jo.get("candle_acc_trade_price")));
+            result.add((Object) hashMap);
+        }
+        return result;
+    }
+
+    private static boolean isInstance(String to, String s) throws ClassNotFoundException {
+        return Class.forName(s).isInstance(to);
+    }
+//    } 데이터 가공영역 end
+
+    private String get_url_ohlcv(String interval){
         String url = "";
         String[] a = new String[3];
 
@@ -48,9 +78,9 @@ public class QuotationApi {
         return url;
     }
 
-    public static ResponseDto<List<String>, String[]> get_tickers(){ return get_tickers("", false, false, false); }
-    public static ResponseDto<List<String>, String[]> get_tickers(String fiat) { return get_tickers(fiat, false, false, false); }
-    public static ResponseDto<List<String>, String[]> get_tickers(String fiat, boolean is_details,
+    public ResponseDto<List<String>, String[]> get_tickers(){ return get_tickers("", false, false, false); }
+    public ResponseDto<List<String>, String[]> get_tickers(String fiat) { return get_tickers(fiat, false, false, false); }
+    public ResponseDto<List<String>, String[]> get_tickers(String fiat, boolean is_details,
                                                         boolean limit_info, boolean verbose){
         ResponseDto<JSONArray, String[]> response;
         ResponseDto<List<String>, String[]> result = new ResponseDto<>();
@@ -82,8 +112,41 @@ public class QuotationApi {
         return result;
     }
 
-    public static void main(String[] argv){
-//        System.out.println(get_url_ohlcv("month"));
-        System.out.println(get_tickers("KRW").getData());
+//  return keys ('volume', 'datetime', 'high', 'low', close', 'value', 'open') type (JSONArray)
+    public JSONArray get_ohlcv(String ticker) throws ClassNotFoundException { return get_ohlcv(ticker, "day", 200, ""); }
+    public JSONArray get_ohlcv(String ticker, String interval, int count, String to) throws ClassNotFoundException {
+        int MAX_CALL_COUNT = 200;
+        RequestDto requestDto = new RequestDto();
+        ResponseDto<JSONArray, String[]> response = new ResponseDto<>();
+        HashMap<String, String> params = new HashMap<>();
+        String dt_str = "";
+
+//        to : 마지막 캔들 시각
+        if (to.equals("")){
+            LocalDate curDate = LocalDate.now();
+            LocalTime curTime = LocalTime.now();
+            LocalDateTime dt = LocalDateTime.of(curDate, curTime);
+            dt_str = dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
+        }else if(isInstance(to, "java.lang.String")){
+            dt_str = to;
+        }
+        String count_str = String.valueOf(Math.max(count, 1));
+
+        params.put("market", ticker);
+        params.put("count", count_str);
+        params.put("to", dt_str);
+
+        try{
+            requestDto.setUrl(get_url_ohlcv(interval));
+            requestDto.setParams(params);
+            RequestApi requestApi = new RequestApi();
+            response = requestApi._call_public_api(requestDto);
+        }catch (Exception e){
+            System.out.println(e.getClass().getName());
+        }
+        return ohlcv_conversion(response.getData());
+    }
+
+    public static void main(String[] argv) throws Exception {
     }
 }
