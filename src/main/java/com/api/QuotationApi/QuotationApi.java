@@ -147,6 +147,20 @@ public class QuotationApi {
         return ohlcv_conversion(response.getData());
     }
 
-    public static void main(String[] argv) throws Exception {
+    public JSONArray get_current_price(String ticker, boolean limit_info, boolean verbose){
+        ResponseDto<JSONArray, String[]> response = new ResponseDto<>();
+        RequestDto requestDto = new RequestDto();
+        HashMap<String, String> params = new HashMap<>();
+        params.put("market", ticker);
+
+        try{
+            requestDto.setUrl("https://api.upbit.com/v1/trades/ticks");
+            requestDto.setParams(params);
+            RequestApi requestApi = new RequestApi();
+            response = requestApi._call_public_api(requestDto);
+        }catch (Exception e){
+            System.out.println(e.getClass().getName());
+        }
+        return response.getData();
     }
 }
