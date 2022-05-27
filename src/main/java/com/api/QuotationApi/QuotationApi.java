@@ -147,6 +147,7 @@ public class QuotationApi {
         return ohlcv_conversion(response.getData());
     }
 
+    public JSONArray get_current_price(String ticker){ return get_current_price(ticker, false, false); }
     public JSONArray get_current_price(String ticker, boolean limit_info, boolean verbose){
         ResponseDto<JSONArray, String[]> response = new ResponseDto<>();
         RequestDto requestDto = new RequestDto();
