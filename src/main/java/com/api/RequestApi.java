@@ -41,9 +41,9 @@ public class RequestApi {
     }
 
     public static String[] _parse_remaining_req(String remaining_req){
-        String[] result = new String[3];
+        String[] result = new String[2];
         try{
-            Pattern p = Pattern.compile("group=([a-z]+); min=([0-9]+); sec=([0-9]+)");
+            Pattern p = Pattern.compile("min=([0-9]+); sec=([0-9]+)");
             Matcher m = p.matcher(remaining_req);
 
             while (m.find()){

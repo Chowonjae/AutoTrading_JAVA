@@ -3,7 +3,6 @@ package com.api.QuotationApi;
 import com.api.RequestApi;
 import com.api.dto.RequestDto;
 import com.api.dto.ResponseDto;
-import okhttp3.Response;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -161,8 +160,9 @@ public class QuotationApi {
         return ohlcv_conversion(response.getData());
     }
 
-    public JSONArray get_current_price(String ticker){ return get_current_price(ticker, false, false); }
-    public JSONArray get_current_price(String ticker, boolean limit_info, boolean verbose){
+    public int get_current_price(String ticker){ return get_current_price(ticker, false, false); }
+    public int get_current_price(String ticker, boolean limit_info, boolean verbose){
+        int result;
         ResponseDto<JSONArray, String[]> response = new ResponseDto<>();
         RequestDto requestDto = new RequestDto();
         HashMap<String, String> params = new HashMap<>();
@@ -173,10 +173,16 @@ public class QuotationApi {
             requestDto.setParams(params);
             RequestApi requestApi = new RequestApi();
             response = requestApi._call_public_api(requestDto);
+            if (response.getRemaining()[1].equals("1")){
+                Thread.sleep(1000);
+            }
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
-        return response.getData();
+        JSONObject jo = (JSONObject) response.getData().get(0);
+        result = Integer.parseInt(Object_Double(jo.get("trade_price")));
+
+        return result;
     }
 
     public JSONArray get_orderBook(String ticker){ return get_orderBook(ticker, false); }
@@ -194,7 +200,7 @@ public class QuotationApi {
         }catch (Exception e){
             System.out.println(e.getClass().getName());
         }
-
+        System.out.println(Arrays.toString(response.getRemaining()));
         return orderBook_conversion(response.getData());
     }
     // json이 지수 표현으로 되어있는지를 확인해서 지수인 값만 변경할 수 있도록 하면 좋을듯
