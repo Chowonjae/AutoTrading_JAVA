@@ -41,6 +41,20 @@ public class QuotationApi {
         return result;
     }
 
+    private  JSONArray orderBook_conversion(JSONArray ja){
+        for(Object o : ja){
+            JSONObject jo = (JSONObject) o;
+            JSONArray jsonArray = (JSONArray) jo.get("orderbook_units");
+
+            for(int i = 0; i < jsonArray.size(); i++){
+                JSONObject joj = (JSONObject) jsonArray.get(i);
+                joj.put("bid_price", Object_Double(joj.get("bid_price")));
+                joj.put("ask_price", Object_Double(joj.get("ask_price")));
+            }
+        }
+        return ja;
+    }
+
     private static boolean isInstance(String to, String s) throws ClassNotFoundException {
         return Class.forName(s).isInstance(to);
     }
@@ -164,4 +178,24 @@ public class QuotationApi {
         }
         return response.getData();
     }
+
+    public JSONArray get_orderBook(String ticker){ return get_orderBook(ticker, false); }
+    public JSONArray get_orderBook(String ticker, boolean limit_info){
+        ResponseDto<JSONArray, String[]> response = new ResponseDto<>();
+        RequestDto requestDto = new RequestDto();
+        HashMap<String, String> params = new HashMap<>();
+        params.put("markets", ticker);
+
+        try{
+            requestDto.setUrl("https://api.upbit.com/v1/orderbook");
+            requestDto.setParams(params);
+            RequestApi requestApi = new RequestApi();
+            response = requestApi._call_public_api(requestDto);
+        }catch (Exception e){
+            System.out.println(e.getClass().getName());
+        }
+
+        return orderBook_conversion(response.getData());
+    }
+    // json이 지수 표현으로 되어있는지를 확인해서 지수인 값만 변경할 수 있도록 하면 좋을듯
 }
