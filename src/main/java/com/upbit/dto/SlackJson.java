@@ -25,7 +25,6 @@ public class SlackJson {
         }else{
             Object item = data.get("event");
             if(item != null && type.equals("event_callback")){
-                System.out.println(1);
                 this.event = (Map<String, String>) item;
                 this.eventType = event.get("type");
                 this.user = event.get("user");
