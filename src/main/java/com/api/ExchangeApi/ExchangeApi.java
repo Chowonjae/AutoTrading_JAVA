@@ -9,10 +9,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -23,44 +25,27 @@ import java.util.*;
 public class ExchangeApi {
     private String access = "";
     private String secret = "";
-    @Value("${upbit.url.ExchangeApi.asset.accounts}")
-    private String accounts;
-    @Value("${upbit.url.ExchangesApi.bill.order}")
-    private String order;
-    @Value("${upbit.url.ExchangesApi.bill.orders}")
-    private String orders;
-    @Value("${upbit.url.ExchangesApi.bill.chance}")
-    private String chance;
 
-    public ExchangeApi(String access, String secret){
-        this.access = access;
-        this.secret = secret;
+//    public ExchangeApi(String access, String secret){
+//        this.access = access;
+//        this.secret = secret;
+//    }
+
+    public void build(){
+        JSONParser jsonParser = new JSONParser();
+        ClassPathResource resource = new ClassPathResource("config/key.json");
+        Reader reader;
+        JSONObject jsonObject = null;
+        try {
+            reader = new FileReader(resource.getFile());
+            jsonObject = (JSONObject) jsonParser.parse(reader);
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }finally {
+            this.access = (String) (jsonObject != null ? jsonObject.get("accessKey") : "access 값이 지정되지 않습니다.");
+            this.secret = (String) (jsonObject != null ? jsonObject.get("secretKey") : "secret 값이 지정되지 않습니다.");
+        }
     }
-
-//    private String[] _convertToStringToArray(String StA){
-//        String[] result = new String[2];
-//        String[] StAArray = StA.split(", ");
-//        String[] req = new String[3];
-//        String a = StAArray[0].replaceFirst("\\[", "");
-//        req[0] = StAArray[1].replaceFirst("\\[", "");
-//        req[1] = StAArray[2];
-//        req[2] = StAArray[3].replace("]]", "");
-//        result[0] = a;
-//        result[1] = Arrays.toString(req);
-//
-//        return result;
-//    }
-//
-//    private JSONArray _convertToJson(String result){
-//        JSONParser jsonParser = new JSONParser();
-//        JSONArray jsonArray = null;
-//        try {
-//            jsonArray = (JSONArray) jsonParser.parse(result);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-//        return jsonArray;
-//    }
 
     private String _request_headers(){
         Algorithm algorithm = Algorithm.HMAC256(this.secret);
@@ -68,7 +53,6 @@ public class ExchangeApi {
                 .withClaim("access_key", access)
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .sign(algorithm);
-
         return "Bearer " + jwtToken;
     }
     private String _request_headers_withQuery(HashMap<String, String> params)
@@ -152,6 +136,7 @@ public class ExchangeApi {
 //    주문
 //    -------------------------------------------------------------------------------
 //    지정가 매수 (지정가 매수는 price가 호가, 시장가 매수는 price가 내가 주문하길 원하는 잔고)
+    public String buy_limit_order(String ticker, int price, double volume){ return buy_limit_order(ticker, price, volume, false); }
     public String buy_limit_order(String ticker, int price, double volume, boolean contain_req){
         ResponseDto<String, String[]> responseDto = new ResponseDto<>();
         RequestDto requestDto = new RequestDto();
@@ -174,23 +159,26 @@ public class ExchangeApi {
     }
 
 //    시장가 매도
+    public String sell_market_order(String ticker, double volume){ return sell_market_order(ticker, volume, false); }
     public String sell_market_order(String ticker, double volume, boolean contain_req){
+        System.out.println(ticker);
+        System.out.println(volume);
         ResponseDto<String, String[]> responseDto = new ResponseDto<>();
-        RequestDto requestDto = new RequestDto();
-        try{
-            requestDto.setUrl("https://api.upbit.com/v1/orders");
-            HashMap<String, String> params = new HashMap<>();
-            params.put("market", ticker);
-            params.put("side", "ask");
-            params.put("volume", String.valueOf(volume));
-            params.put("ord_type", "market");
-            requestDto.setAuthenticationToken(_request_headers_withQuery(params));
-            requestDto.setParams(params);
-            RequestApi requestApi = new RequestApi();
-            responseDto = requestApi._send_post_request(requestDto);
-        }catch (Exception e){
-            System.out.println(e.getClass().getName());
-        }
+//        RequestDto requestDto = new RequestDto();
+//        try{
+//            requestDto.setUrl("https://api.upbit.com/v1/orders");
+//            HashMap<String, String> params = new HashMap<>();
+//            params.put("market", ticker);
+//            params.put("side", "ask");
+//            params.put("volume", String.valueOf(volume));
+//            params.put("ord_type", "market");
+//            requestDto.setAuthenticationToken(_request_headers_withQuery(params));
+//            requestDto.setParams(params);
+//            RequestApi requestApi = new RequestApi();
+//            responseDto = requestApi._send_post_request(requestDto);
+//        }catch (Exception e){
+//            System.out.println(e.getClass().getName());
+//        }
         return responseDto.getData();
     }
 

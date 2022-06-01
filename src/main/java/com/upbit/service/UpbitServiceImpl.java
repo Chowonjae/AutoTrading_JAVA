@@ -5,12 +5,12 @@ import com.upbit.logic.Main;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UpbitServiceImpl {
+public class UpbitServiceImpl implements UpbitService{
     private String message;
     private String text;
     private final Main main;
 
-    public UpbitServiceImpl(Main m){ this.main = m; }
+    public UpbitServiceImpl(Main main){ this.main = main; System.out.println("service 생성자 호출"); }
 
     public String appMentionResponse(String text, String channel, String user){
         String result = "";

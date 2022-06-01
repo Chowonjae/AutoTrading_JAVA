@@ -1,6 +1,7 @@
 package com.upbit.controller;
 
 import com.upbit.dto.SlackJson;
+import com.upbit.service.UpbitService;
 import com.upbit.service.UpbitServiceImpl;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,9 +24,9 @@ import java.util.logging.Logger;
 @RestController
 public class UpbitControllerImpl implements UpbitController {
 //    private final Logger log = (Logger) LoggerFactory.getLogger(this.getClass());
-    private final UpbitServiceImpl service;
+    private final UpbitService service;
 
-    public UpbitControllerImpl(UpbitServiceImpl service){ this.service = service; }
+    public UpbitControllerImpl(UpbitService service){ this.service = service; System.out.println("controller 생성자 호출");}
 
     @Override
     @PostMapping(value = "/slack", produces = MediaType.APPLICATION_JSON_VALUE)
