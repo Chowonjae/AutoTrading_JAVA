@@ -126,8 +126,10 @@ public class QuotationApi {
     }
 
 //  return keys ('volume', 'datetime', 'high', 'low', close', 'value', 'open') type (JSONArray)
-    public JSONArray get_ohlcv(String ticker) throws ClassNotFoundException { return get_ohlcv(ticker, "day", 200, ""); }
-    public JSONArray get_ohlcv(String ticker, String interval, int count, String to) throws ClassNotFoundException {
+//    [{"volume":"813.1815432299999883980490267276763916015625","datetime":"2022-06-03T09:00:00","high":"38630000","low":"38207000","close":"38360000","value":"31178568771.149921417236328125","open":"38393000"},{"volume":"2899.345672620000186725519597530364990234375","datetime":"2022-06-02T09:00:00","high":"38680000","low":"37558000","close":"38392000","value":"110236787826.560882568359375","open":"37880000"}
+    public JSONArray get_ohlcv(String ticker, String day, int count) { return get_ohlcv(ticker, day, count, ""); }
+    public JSONArray get_ohlcv(String ticker) { return get_ohlcv(ticker, "day", 200, ""); }
+    public JSONArray get_ohlcv(String ticker, String interval, int count, String to) {
         int MAX_CALL_COUNT = 200;
         RequestDto requestDto = new RequestDto();
         ResponseDto<JSONArray, String[]> response = new ResponseDto<>();
@@ -140,8 +142,14 @@ public class QuotationApi {
             LocalTime curTime = LocalTime.now();
             LocalDateTime dt = LocalDateTime.of(curDate, curTime);
             dt_str = dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
-        }else if(isInstance(to, "java.lang.String")){
-            dt_str = to;
+        }else {
+            try {
+                if(isInstance(to, "java.lang.String")){
+                    dt_str = to;
+                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
         String count_str = String.valueOf(Math.max(count, 1));
 
@@ -203,5 +211,10 @@ public class QuotationApi {
         System.out.println(Arrays.toString(response.getRemaining()));
         return orderBook_conversion(response.getData());
     }
+
+
     // json이 지수 표현으로 되어있는지를 확인해서 지수인 값만 변경할 수 있도록 하면 좋을듯
+    public static void main(String[] argv){
+//        System.out.println(get_ohlcv());
+    }
 }

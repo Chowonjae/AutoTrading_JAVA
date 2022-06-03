@@ -1,22 +1,20 @@
 package com.upbit.logic;
 
-import com.api.ExchangeApi.ExchangeApi;
-import com.api.dto.ResponseDto;
-import com.slack.SlackRequest;
 import com.slack.SlackRequestImpl;
 import com.upbit.dto.Execute;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.upbit.logic.trading.TradingAlgorithm;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
 
 @Component
 public class Main {
     private boolean status = false;
     private boolean temp = true;
+    private final TradingAlgorithm tradingAlgorithm;
+
+    public Main(TradingAlgorithm tradingAlgorithm) {
+        this.tradingAlgorithm = tradingAlgorithm;
+    }
 
     public void setStatus(Execute execute){ this.status = execute.getStatus(); }
 
@@ -34,7 +32,6 @@ public class Main {
 
     private void main(){
         int i = 0;
-        sell();
         try{
             while(this.status){
                 System.out.println(i);
@@ -47,18 +44,5 @@ public class Main {
 
     }
 
-    private void sell() {
-        //true 값을 생성자 호출에 넣어줘야 작
-        ExchangeApi exchangeApi = new ExchangeApi();
-        exchangeApi.build();
 
-        JSONArray get_balances_ja = exchangeApi.get_balances().getData();
-
-        for (Object o : get_balances_ja) {
-            JSONObject jo = (JSONObject) o;
-            if (!jo.get("currency").equals("KRW") && !jo.get("currency").equals("DON")) {
-                exchangeApi.sell_market_order((String) jo.get("currency"), Double.parseDouble((String) jo.get("balance")));
-            }
-        }
-    }
 }
