@@ -1,32 +1,32 @@
 package com.upbit.controller;
 
 import com.upbit.dto.SlackJson;
+import com.upbit.mappers.HistoryRepository;
 import com.upbit.service.UpbitService;
-import com.upbit.service.UpbitServiceImpl;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.json.simple.JSONObject;
-import org.slf4j.LoggerFactory;
+import com.upbit.dto.History;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
+@Slf4j
 @RestController
 public class UpbitControllerImpl implements UpbitController {
 //    private final Logger log = (Logger) LoggerFactory.getLogger(this.getClass());
+    @Autowired
     private final UpbitService service;
+    @Autowired
+    private HistoryRepository historyRepository;
 
-    public UpbitControllerImpl(UpbitService service){ this.service = service; System.out.println("controller 생성자 호출");}
+    public UpbitControllerImpl(UpbitService service){
+        this.service = service;
+        System.out.println("controller 생성자 호출");
+    }
 
     @Override
     @PostMapping(value = "/slack", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -45,6 +45,11 @@ public class UpbitControllerImpl implements UpbitController {
         }catch (Exception e){
             return new ResponseEntity<>(e.getCause().toString(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/history")
+    public List<History> allHistory(){
+        return service.getHistory();
     }
 
     @Override

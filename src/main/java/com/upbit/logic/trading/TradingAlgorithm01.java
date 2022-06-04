@@ -13,17 +13,17 @@ public class TradingAlgorithm01 implements TradingAlgorithm {
     private HashMap<String, Boolean> tradeState = new HashMap<>();
     private HashMap<String, Double> target_price = new HashMap<>();
 
-    private final ExchangeApi exchangeApi;
+//    private final ExchangeApi exchangeApi;
     private final int targetCount = ticker_list.length;
     private final double buy_percent = 0.2;
 
-    public TradingAlgorithm01(ExchangeApi exchangeApi) {
-        this.exchangeApi = exchangeApi;
-        this.exchangeApi.build();
-        for (String ticker : this.ticker_list){
-            this.tradeState.put(ticker, false);
-        }
-    }
+//    public TradingAlgorithm01(ExchangeApi exchangeApi) {
+//        this.exchangeApi = exchangeApi;
+//        this.exchangeApi.build();
+//        for (String ticker : this.ticker_list){
+//            this.tradeState.put(ticker, false);
+//        }
+//    }
 
     @Override
     public void target_price_define(){
@@ -47,16 +47,16 @@ public class TradingAlgorithm01 implements TradingAlgorithm {
 //        ExchangeApi exchangeApi = new ExchangeApi();
 //        exchangeApi.build();
 
-        JSONArray get_balances_ja = exchangeApi.get_balances().getData();
-
-        for (Object o : get_balances_ja) {
-            JSONObject jo = (JSONObject) o;
-            if (!jo.get("currency").equals("KRW") && !jo.get("currency").equals("DON")) {
-                this.exchangeApi.sell_market_order((String) jo.get("currency"), Double.parseDouble((String) jo.get("balance")));
-                String ticker = "KRW-" + (String) jo.get("currency");
-                this.tradeState.put(ticker, false);
-            }
-        }
+//        JSONArray get_balances_ja = exchangeApi.get_balances().getData();
+//
+//        for (Object o : get_balances_ja) {
+//            JSONObject jo = (JSONObject) o;
+//            if (!jo.get("currency").equals("KRW") && !jo.get("currency").equals("DON")) {
+//                this.exchangeApi.sell_market_order((String) jo.get("currency"), Double.parseDouble((String) jo.get("balance")));
+//                String ticker = "KRW-" + (String) jo.get("currency");
+//                this.tradeState.put(ticker, false);
+//            }
+//        }
     }
 
 }
