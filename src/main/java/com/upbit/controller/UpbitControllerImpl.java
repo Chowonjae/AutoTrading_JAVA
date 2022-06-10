@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +49,9 @@ public class UpbitControllerImpl implements UpbitController {
     public List<History> allHistory(){
         return service.getHistory();
     }
+
+    @GetMapping("/a")
+    public void a() throws ParseException { service.setHistory("btc,xrp");}
 
     @Override
     @GetMapping(value = "/")

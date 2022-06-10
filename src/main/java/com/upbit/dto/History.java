@@ -11,4 +11,5 @@ public class History {
     private double high_price;
     private double low_price;
     private double close_price;
+    private String table_name;
 }
