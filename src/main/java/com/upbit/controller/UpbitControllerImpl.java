@@ -18,10 +18,7 @@ import java.util.Map;
 @RestController
 public class UpbitControllerImpl implements UpbitController {
 //    private final Logger log = (Logger) LoggerFactory.getLogger(this.getClass());
-    @Autowired
     private final UpbitService service;
-    @Autowired
-    private HistoryRepository historyRepository;
 
     public UpbitControllerImpl(UpbitService service){
         this.service = service;

@@ -15,11 +15,11 @@ public class UpbitServiceImpl implements UpbitService{
     private String message;
     private String text;
     private final Main main;
-    @Autowired
-    private HistoryRepository historyRepository;
+    private final HistoryRepository historyRepository;
 
-    public UpbitServiceImpl(Main main){
+    public UpbitServiceImpl(Main main, HistoryRepository historyRepository){
         this.main = main;
+        this.historyRepository = historyRepository;
         System.out.println("service 생성자 호출");
     }
 
