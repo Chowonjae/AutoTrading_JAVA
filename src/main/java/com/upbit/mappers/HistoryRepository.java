@@ -1,6 +1,7 @@
 package com.upbit.mappers;
 
 import com.upbit.dto.History;
+import com.upbit.dto.SetHistory;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -14,5 +15,5 @@ import java.util.Map;
 public interface HistoryRepository {
     List<History> allHistorys();
     History getHistory(String table_name);
-    void setHistory(History history);
+    void setHistory(SetHistory history);
 }

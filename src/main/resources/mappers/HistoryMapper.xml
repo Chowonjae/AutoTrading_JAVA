@@ -10,7 +10,7 @@
     <select id="getHistory" resultType="com.upbit.dto.History" parameterType="String">
         SELECT * FROM ${table_name} ORDER BY base_date DESC LIMIT 1;
     </select>
-    <insert id="setHistory" parameterType="com.upbit.dto.History">
-        INSERT INTO ${table_name}(base_date, open_price, high_price, low_price, close_price) VALUES (${base_date}, ${open_price}, ${high_price}, ${low_price}, ${close_price})
+    <insert id="setHistory" parameterType="com.upbit.dto.SetHistory">
+        INSERT INTO ${table_name} (base_date, open_price, high_price, low_price, close_price) VALUES (STR_TO_DATE('${base_date}', '%Y-%m-%d %H:%i:%S'), ${open_price}, ${high_price}, ${low_price}, ${close_price});
     </insert>
 </mapper>

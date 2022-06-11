@@ -3,6 +3,7 @@ package com.upbit.service;
 import com.api.QuotationApi.QuotationApi;
 import com.upbit.dto.Execute;
 import com.upbit.dto.History;
+import com.upbit.dto.SetHistory;
 import com.upbit.logic.Main;
 import com.upbit.mappers.HistoryRepository;
 import lombok.AllArgsConstructor;
@@ -77,10 +78,11 @@ public class UpbitServiceImpl implements UpbitService{
             for(int i = abs-1; i > 0; i--){
                 JSONObject jsonObject = new JSONObject((Map) ohlcv.get(i));
 
-                History set_history = new History();
+                SetHistory set_history = new SetHistory();
 
                 String date_str = (String) jsonObject.get("datetime");
-                Date date = Date.valueOf(date_str.split("T")[0]);
+                String date = date_str.split("T")[0] + " " + date_str.split("T")[1];
+
 
                 double high = Double.parseDouble((String) jsonObject.get("high"));
                 double close = Double.parseDouble((String) jsonObject.get("close"));
